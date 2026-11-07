@@ -60,7 +60,7 @@ const formatDate = (iso: string) => {
 
 async function loadLogo(): Promise<string | null> {
   try {
-    const response = await fetch('/talwin-logo.jpeg');
+    const response = await fetch(`${import.meta.env.BASE_URL}talwin-logo.jpeg`);
     const blob = await response.blob();
     return await new Promise<string>((resolve) => {
       const reader = new FileReader();

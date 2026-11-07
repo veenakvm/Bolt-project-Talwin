@@ -58,7 +58,7 @@ function App() {
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-4">
               <img
-                src="/talwin-logo.jpeg"
+                src={`${import.meta.env.BASE_URL}talwin-logo.jpeg`}
                 alt="TALWIN AquaRay Logo"
                 className="w-16 h-16 object-contain"
               />
