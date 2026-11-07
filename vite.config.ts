@@ -7,4 +7,14 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  publicDir: 'public',
+  build: {
+    copyPublicDir: true,
+    rollupOptions: {
+      external: (id) => {
+        if (id.includes('copy copy')) return true;
+        return false;
+      }
+    }
+  }
 });

@@ -2,17 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  @keyframes float {
-    0%, 100% {
-      transform: translateY(0px);
-    }
-    50% {
-      transform: translateY(-20px);
-    }
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm 14mm;
   }
 
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  header,
+  nav,
+  button,
+  .no-print,
+  [class*="fixed"],
+  [class*="sticky"] {
+    display: none !important;
+  }
+
+  #invoice-print-area {
+    display: block !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .bg-gray-800 {
+    background-color: #1f2937 !important;
+    color: white !important;
+  }
+
+  .border-gray-800 {
+    border-color: #1f2937 !important;
   }
 }

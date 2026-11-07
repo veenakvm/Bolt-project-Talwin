@@ -1,0 +1,187 @@
+export function toINR(n: number): string {
+  return '₹' + Number(n || 0).toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+export function toINRn(n: number): string {
+  return Number(n || 0).toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+// PDF-safe Indian number formatting
+export function formatIndianNumber(n: number): string {
+  const num = Number(n || 0);
+  const [intPart, decPart] = num.toFixed(2).split('.');
+
+  // Indian numbering system: last 3 digits, then groups of 2
+  let formatted = '';
+  const len = intPart.length;
+
+  if (len <= 3) {
+    formatted = intPart;
+  } else {
+    // Last 3 digits
+    formatted = intPart.slice(-3);
+    let remaining = intPart.slice(0, -3);
+
+    // Groups of 2 digits
+    while (remaining.length > 0) {
+      if (remaining.length <= 2) {
+        formatted = remaining + ',' + formatted;
+        remaining = '';
+      } else {
+        formatted = remaining.slice(-2) + ',' + formatted;
+        remaining = remaining.slice(0, -2);
+      }
+    }
+  }
+
+  return formatted + '.' + decPart;
+}
+
+export function numToWords(amount: number): string {
+  const ones = [
+    '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+    'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen',
+    'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'
+  ];
+  const tens = [
+    '', '', 'Twenty', 'Thirty', 'Forty', 'Fifty',
+    'Sixty', 'Seventy', 'Eighty', 'Ninety'
+  ];
+
+  function convertHundreds(n: number): string {
+    if (n < 20) return ones[n];
+    if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 ? ' ' + ones[n % 10] : '');
+    return ones[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' ' + convertHundreds(n % 100) : '');
+  }
+
+  let words = '';
+  let x = Math.floor(amount);
+
+  if (x >= 10000000) {
+    words += convertHundreds(Math.floor(x / 10000000)) + ' Crore ';
+    x %= 10000000;
+  }
+  if (x >= 100000) {
+    words += convertHundreds(Math.floor(x / 100000)) + ' Lakh ';
+    x %= 100000;
+  }
+  if (x >= 1000) {
+    words += convertHundreds(Math.floor(x / 1000)) + ' Thousand ';
+    x %= 1000;
+  }
+  if (x > 0) {
+    words += convertHundreds(x);
+  }
+
+  return words.trim() + ' Rupees only';
+}
+
+export interface LineItem {
+  id: string;
+  item_name: string;
+  item_description?: string;
+  hsn_sac?: string;
+  mrp?: number;
+  quantity: number;
+  unit: string;
+  price_per_unit: number;
+  gst_rate: number;
+  gst_amount: number;
+  total_amount: number;
+}
+
+export function calculateLineItem(item: Partial<LineItem>): LineItem {
+  const quantity = Number(item.quantity) || 1;
+  const pricePerUnit = Number(item.price_per_unit) || 0;
+  const gstRate = item.gst_rate !== undefined && item.gst_rate !== null ? Number(item.gst_rate) : 18;
+
+  const gstAmount = (pricePerUnit * quantity * gstRate) / 100;
+  const totalAmount = pricePerUnit * quantity + gstAmount;
+
+  return {
+    id: item.id || crypto.randomUUID(),
+    item_name: item.item_name || '',
+    item_description: item.item_description || '',
+    hsn_sac: item.hsn_sac || '',
+    mrp: item.mrp,
+    quantity,
+    unit: item.unit || 'Pcs',
+    price_per_unit: pricePerUnit,
+    gst_rate: gstRate,
+    gst_amount: gstAmount,
+    total_amount: totalAmount
+  };
+}
+
+export interface InvoiceTotals {
+  taxableAmount: number;
+  gstTotal: number;
+  subTotal: number;
+  roundOff: number;
+  grandTotal: number;
+}
+
+export function calculateInvoiceTotals(items: LineItem[]): InvoiceTotals {
+  const taxableAmount = items.reduce((sum, item) =>
+    sum + (item.price_per_unit * item.quantity), 0
+  );
+
+  const gstTotal = items.reduce((sum, item) =>
+    sum + item.gst_amount, 0
+  );
+
+  const subTotal = taxableAmount + gstTotal;
+  const grandTotal = Math.round(subTotal);
+  const roundOff = grandTotal - subTotal;
+
+  return {
+    taxableAmount,
+    gstTotal,
+    subTotal,
+    roundOff,
+    grandTotal
+  };
+}
+
+export interface GSTSummary {
+  hsn: string;
+  taxable: number;
+  cgstRate: number;
+  cgstAmount: number;
+  sgstRate: number;
+  sgstAmount: number;
+  totalTax: number;
+}
+
+export function calculateGSTSummary(items: LineItem[]): GSTSummary[] {
+  const gstMap: Record<string, GSTSummary> = {};
+
+  items.forEach(item => {
+    const key = item.hsn_sac || 'N/A';
+    if (!gstMap[key]) {
+      gstMap[key] = {
+        hsn: key,
+        taxable: 0,
+        cgstRate: item.gst_rate / 2,
+        cgstAmount: 0,
+        sgstRate: item.gst_rate / 2,
+        sgstAmount: 0,
+        totalTax: 0
+      };
+    }
+
+    const base = item.price_per_unit * item.quantity;
+    gstMap[key].taxable += base;
+    gstMap[key].cgstAmount += (base * item.gst_rate / 2) / 100;
+    gstMap[key].sgstAmount += (base * item.gst_rate / 2) / 100;
+    gstMap[key].totalTax += item.gst_amount;
+  });
+
+  return Object.values(gstMap);
+}
