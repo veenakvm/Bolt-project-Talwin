@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { FileText, Calendar, MapPin, User, Phone, CheckCircle, XCircle, Download, Search } from 'lucide-react';
 import { jsPDF } from 'jspdf';
+import type { SurveyProduct } from './shared/surveyProducts';
 
 interface Survey {
   id: string;
@@ -20,6 +21,7 @@ interface Survey {
   ro_purifier: boolean;
   water_heater: boolean;
   solar_rooftop: boolean;
+  products_required?: SurveyProduct[];
 }
 
 export default function SurveyList() {
@@ -213,6 +215,27 @@ export default function SurveyList() {
       doc.text(`[X] Solar Rooftop - kW: ${selectedSurvey.solar_rooftop_kw || 'N/A'}`, 15, yPosition);
       yPosition += 6;
     }
+
+    (selectedSurvey.products_required as SurveyProduct[] || []).forEach((product: SurveyProduct) => {
+      if (yPosition > 270) { doc.addPage(); yPosition = 20; }
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text(`${product.product_name}  x ${product.quantity}`, 15, yPosition);
+      yPosition += 5;
+      if (product.product_specs) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        const specLines: string[] = doc.splitTextToSize(`Specs: ${product.product_specs}`, 175);
+        specLines.forEach((line) => {
+          if (yPosition > 280) { doc.addPage(); yPosition = 20; }
+          doc.text(line, 20, yPosition);
+          yPosition += 4;
+        });
+      }
+      yPosition += 2;
+    });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
 
     yPosition += 4;
     doc.setFontSize(12);
@@ -461,6 +484,22 @@ export default function SurveyList() {
                   </div>
                 )}
               </div>
+              {(selectedSurvey.products_required || []).length > 0 && (
+                <div className="mt-4 space-y-2">
+                  {(selectedSurvey.products_required as SurveyProduct[] || []).map((product: SurveyProduct, i: number) => (
+                    <div key={i} className="border border-gray-200 rounded-lg p-3">
+                      <div className="flex items-center gap-2 font-semibold">
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                        {product.product_name}
+                        <span className="text-sm font-normal text-gray-500">× {product.quantity}</span>
+                      </div>
+                      {product.product_specs && (
+                        <p className="mt-1 ml-7 text-sm text-gray-600 whitespace-pre-line">{product.product_specs}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
 
             <section>

@@ -87,36 +87,54 @@ export interface LineItem {
   item_name: string;
   item_description?: string;
   hsn_sac?: string;
+  /** Legacy field from older invoices; no longer shown or entered. */
   mrp?: number;
   quantity: number;
   unit: string;
   price_per_unit: number;
+  discount_percent?: number;
+  /** Qty x price, less discount. GST is charged on this amount. */
+  taxable_amount?: number;
   gst_rate: number;
   gst_amount: number;
   total_amount: number;
 }
 
+/** Taxable value of a line (after discount). Works for items saved before discounts existed. */
+export function lineTaxable(item: LineItem): number {
+  if (typeof item.taxable_amount === 'number') return item.taxable_amount;
+  const discount = Number(item.discount_percent) || 0;
+  return item.price_per_unit * item.quantity * (1 - discount / 100);
+}
+
 export function calculateLineItem(item: Partial<LineItem>): LineItem {
   const quantity = Number(item.quantity) || 1;
   const pricePerUnit = Number(item.price_per_unit) || 0;
+  const discountPercent = Math.min(Math.max(Number(item.discount_percent) || 0, 0), 100);
   const gstRate = item.gst_rate !== undefined && item.gst_rate !== null ? Number(item.gst_rate) : 18;
 
-  const gstAmount = (pricePerUnit * quantity * gstRate) / 100;
-  const totalAmount = pricePerUnit * quantity + gstAmount;
+  const taxableAmount = pricePerUnit * quantity * (1 - discountPercent / 100);
+  const gstAmount = (taxableAmount * gstRate) / 100;
+  const totalAmount = taxableAmount + gstAmount;
 
   return {
     id: item.id || crypto.randomUUID(),
     item_name: item.item_name || '',
     item_description: item.item_description || '',
     hsn_sac: item.hsn_sac || '',
-    mrp: item.mrp,
     quantity,
     unit: item.unit || 'Pcs',
     price_per_unit: pricePerUnit,
+    discount_percent: discountPercent,
+    taxable_amount: taxableAmount,
     gst_rate: gstRate,
     gst_amount: gstAmount,
     total_amount: totalAmount
   };
+}
+
+export function emptyLineItem(): LineItem {
+  return calculateLineItem({ quantity: 1, unit: 'Pcs', price_per_unit: 0, gst_rate: 18 });
 }
 
 export interface InvoiceTotals {
@@ -128,9 +146,7 @@ export interface InvoiceTotals {
 }
 
 export function calculateInvoiceTotals(items: LineItem[]): InvoiceTotals {
-  const taxableAmount = items.reduce((sum, item) =>
-    sum + (item.price_per_unit * item.quantity), 0
-  );
+  const taxableAmount = items.reduce((sum, item) => sum + lineTaxable(item), 0);
 
   const gstTotal = items.reduce((sum, item) =>
     sum + item.gst_amount, 0
@@ -147,6 +163,21 @@ export function calculateInvoiceTotals(items: LineItem[]): InvoiceTotals {
     roundOff,
     grandTotal
   };
+}
+
+export const CUSTOMER_TITLES = ['Mr.', 'Mrs.', 'Ms.', 'M/s.', 'Dr.'];
+
+/** "Mr." + "Ramesh" -> "Mr. Ramesh". Leaves the name alone if no title is set. */
+export function formatCustomerName(title: string | null | undefined, name: string): string {
+  return title ? `${title} ${name}` : name;
+}
+
+/** Returns an error message, or null if the customer's phone and address are filled in. */
+export function validateCustomerContact(phone: string, address: string): string | null {
+  const digits = (phone || '').replace(/\D/g, '');
+  if (digits.length < 10) return 'Enter a valid customer phone number (at least 10 digits)';
+  if (!(address || '').trim()) return 'Enter the customer address';
+  return null;
 }
 
 export interface GSTSummary {
@@ -176,7 +207,7 @@ export function calculateGSTSummary(items: LineItem[]): GSTSummary[] {
       };
     }
 
-    const base = item.price_per_unit * item.quantity;
+    const base = lineTaxable(item);
     gstMap[key].taxable += base;
     gstMap[key].cgstAmount += (base * item.gst_rate / 2) / 100;
     gstMap[key].sgstAmount += (base * item.gst_rate / 2) / 100;

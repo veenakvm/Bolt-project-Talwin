@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { Search, Plus, CreditCard as Edit2, X, Save, Trash2, Download } from 'lucide-react';
 import { generateServicePDF } from '../lib/pipelinePdfGenerator';
+import ProductPicker from './shared/ProductPicker';
 
 const PROFESSION_OPTIONS = ['Architect', 'Plumber', 'Contractor', 'Electrician'];
 
@@ -23,6 +24,9 @@ interface ComplaintEntry {
   comments: string;
   vendor_comments: string;
   professional_id: string | null;
+  product_id: string | null;
+  product_name: string | null;
+  product_specs: string | null;
   created_at: string;
 }
 
@@ -44,7 +48,10 @@ export default function ComplaintPipeline() {
     complaint_resolution_status: 'Scheduled',
     comments: '',
     vendor_comments: '',
-    professional_id: '' as string | null
+    professional_id: '' as string | null,
+    product_id: null as string | null,
+    product_name: '',
+    product_specs: ''
   });
 
   useEffect(() => {
@@ -79,7 +86,8 @@ export default function ComplaintPipeline() {
       const { error } = await supabase.from('complaint_pipeline').insert([
         {
           user_id: user?.id,
-          ...formData
+          ...formData,
+          professional_id: formData.professional_id || null
         }
       ]);
 
@@ -93,7 +101,10 @@ export default function ComplaintPipeline() {
         complaint_resolution_status: 'Scheduled',
         comments: '',
         vendor_comments: '',
-        professional_id: ''
+        professional_id: '',
+        product_id: null,
+        product_name: '',
+        product_specs: ''
       });
       setSelectedProfession('');
 
@@ -221,6 +232,17 @@ export default function ComplaintPipeline() {
               />
             </div>
           </div>
+
+          <ProductPicker
+            label="Product"
+            ringClass="focus:ring-orange-500"
+            value={{
+              product_id: formData.product_id,
+              product_name: formData.product_name,
+              product_specs: formData.product_specs
+            }}
+            onChange={(p) => setFormData({ ...formData, ...p })}
+          />
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -394,6 +416,7 @@ export default function ComplaintPipeline() {
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Customer</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Phone</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Product</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Service Type</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Resolution</th>
@@ -407,6 +430,20 @@ export default function ComplaintPipeline() {
                   <tr className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm text-gray-900">{entry.customer_name}</td>
                     <td className="px-4 py-3 text-sm text-gray-900">{entry.phone_number}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900 max-w-xs">
+                      {entry.product_name ? (
+                        <>
+                          <div className="font-medium">{entry.product_name}</div>
+                          {entry.product_specs && (
+                            <div className="text-xs text-gray-500 line-clamp-2" title={entry.product_specs}>
+                              {entry.product_specs}
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-gray-400">—</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-sm">
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                         entry.service_status === 'Under Warranty'
@@ -467,7 +504,7 @@ export default function ComplaintPipeline() {
                   </tr>
                   {editingId === entry.id && (
                     <tr className="bg-orange-50">
-                      <td colSpan={7} className="px-4 py-4">
+                      <td colSpan={8} className="px-4 py-4">
                         <div className="space-y-4">
                           <div className="flex items-center justify-between mb-2">
                             <h4 className="font-bold text-gray-800">Edit Entry</h4>
@@ -497,6 +534,19 @@ export default function ComplaintPipeline() {
                                 value={editFormData.phone_number}
                                 onChange={(e) => setEditFormData({ ...editFormData, phone_number: e.target.value })}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                              />
+                            </div>
+
+                            <div className="md:col-span-2">
+                              <ProductPicker
+                                label="Product"
+                                ringClass="focus:ring-orange-500"
+                                value={{
+                                  product_id: editFormData.product_id ?? null,
+                                  product_name: editFormData.product_name || '',
+                                  product_specs: editFormData.product_specs || ''
+                                }}
+                                onChange={(p) => setEditFormData({ ...editFormData, ...p })}
                               />
                             </div>
 

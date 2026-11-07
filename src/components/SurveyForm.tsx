@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { CheckSquare, Square, Save, FileText } from 'lucide-react';
+import { CheckSquare, Square, Save, FileText, Plus, X } from 'lucide-react';
+import ProductPicker from './shared/ProductPicker';
+import type { SurveyProduct } from './shared/surveyProducts';
 
 interface SurveyFormData {
   customer: string;
@@ -50,6 +52,7 @@ interface SurveyFormData {
   safe_access: string;
   plumbing_status: string;
   tech_signature: string;
+  products_required: SurveyProduct[];
 }
 
 const initialFormData: SurveyFormData = {
@@ -100,6 +103,7 @@ const initialFormData: SurveyFormData = {
   safe_access: '',
   plumbing_status: '',
   tech_signature: '',
+  products_required: [],
 };
 
 interface SurveyFormProps {
@@ -126,7 +130,10 @@ export default function SurveyForm({ onSuccess }: SurveyFormProps) {
     setMessage('');
 
     try {
-      const { error } = await supabase.from('site_surveys').insert([formData]);
+      const { error } = await supabase.from('site_surveys').insert([{
+        ...formData,
+        products_required: formData.products_required.filter(p => p.product_name)
+      }]);
 
       if (error) throw error;
 
@@ -138,6 +145,27 @@ export default function SurveyForm({ onSuccess }: SurveyFormProps) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const updateSurveyProduct = (index: number, patch: Partial<SurveyProduct>) => {
+    setFormData((prev) => ({
+      ...prev,
+      products_required: prev.products_required.map((p, i) => (i === index ? { ...p, ...patch } : p))
+    }));
+  };
+
+  const addSurveyProduct = () => {
+    setFormData((prev) => ({
+      ...prev,
+      products_required: [...prev.products_required, { product_id: null, product_name: '', product_specs: '', quantity: 1 }]
+    }));
+  };
+
+  const removeSurveyProduct = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      products_required: prev.products_required.filter((_, i) => i !== index)
+    }));
   };
 
   const Checkbox = ({ checked, label }: { checked: boolean; label: string }) => (
@@ -638,6 +666,48 @@ export default function SurveyForm({ onSuccess }: SurveyFormProps) {
                   />
                 </div>
               </div>
+            </div>
+
+            <div className="mt-6">
+              <h4 className="text-sm font-bold text-gray-700 uppercase mb-2">Products from catalog</h4>
+              <div className="space-y-3">
+                {formData.products_required.map((product, index) => (
+                  <div key={index} className="flex gap-3 items-start border border-gray-200 rounded-lg p-3">
+                    <div className="flex-1 min-w-0">
+                      <ProductPicker
+                        label={`Product ${index + 1}`}
+                        value={product}
+                        onChange={(picked) => updateSurveyProduct(index, picked)}
+                      />
+                    </div>
+                    <div className="w-20">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Qty</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={product.quantity}
+                        onChange={(e) => updateSurveyProduct(index, { quantity: parseFloat(e.target.value) || 1 })}
+                        className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeSurveyProduct(index)}
+                      className="mt-7 text-red-600 hover:text-red-700"
+                      title="Remove product"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={addSurveyProduct}
+                className="mt-3 flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
+                <Plus className="w-4 h-4" /> Add product
+              </button>
             </div>
           </section>
 

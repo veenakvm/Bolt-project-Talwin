@@ -92,7 +92,7 @@ export default function Login() {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 Welcome to Talwin Aquaray Solutions
               </h1>
-              <p className="text-gray-600">Sign in to access the dashboard</p>
+              <p className="text-gray-600">Staff and dealers: sign in to access the dashboard</p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-6">

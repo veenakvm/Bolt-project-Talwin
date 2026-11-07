@@ -13,6 +13,7 @@ import Vendors from './components/Vendors';
 import Expenses from './components/Expenses';
 import Invoices from './components/Invoices';
 import Quotations from './components/Quotations';
+import type { QuotationForInvoice } from './components/Invoices';
 import { ClipboardList, List, LogOut, TrendingUp, Wrench, AlertCircle, BarChart3, DollarSign, Package, Users, Building2, FileText, Receipt } from 'lucide-react';
 
 type MainTab = 'surveys' | 'pipelines' | 'finance' | 'reports';
@@ -25,7 +26,18 @@ function App() {
   const [surveyView, setSurveyView] = useState<SurveyView>('form');
   const [pipelineView, setPipelineView] = useState<PipelineView>('sales');
   const [financeView, setFinanceView] = useState<FinanceView>('products');
-  const { user, loading, signOut } = useAuth();
+  const [pendingQuotation, setPendingQuotation] = useState<QuotationForInvoice | null>(null);
+  const { user, role, loading, signOut } = useAuth();
+  const isDealer = role === 'dealer';
+  // Dealers only get Quotations and Invoices.
+  const activeTab: MainTab = isDealer ? 'finance' : mainTab;
+  const activeFinanceView: FinanceView =
+    isDealer && (financeView === 'products' || financeView === 'expenses') ? 'quotations' : financeView;
+
+  const convertQuotationToInvoice = (quotation: QuotationForInvoice) => {
+    setPendingQuotation(quotation);
+    setFinanceView('invoices');
+  };
 
   if (loading) {
     return (
@@ -52,7 +64,9 @@ function App() {
               />
               <div>
                 <h1 className="text-2xl font-bold text-gray-800">TALWIN AquaRay Solutions</h1>
-                <p className="text-sm text-gray-600">Field Technician Management System</p>
+                <p className="text-sm text-gray-600">
+                  {isDealer ? 'Dealer Portal' : 'Field Technician Management System'}
+                </p>
               </div>
             </div>
             <button
@@ -65,32 +79,32 @@ function App() {
           </div>
 
           <div className="flex gap-2 border-b border-gray-200">
-            <button
+            {!isDealer && <button
               onClick={() => setMainTab('pipelines')}
               className={`px-6 py-3 font-semibold transition-all border-b-2 ${
-                mainTab === 'pipelines'
+                activeTab === 'pipelines'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-600 hover:text-gray-800'
               }`}
             >
               <TrendingUp className="w-5 h-5 inline mr-2" />
               Pipelines
-            </button>
-            <button
+            </button>}
+            {!isDealer && <button
               onClick={() => setMainTab('surveys')}
               className={`px-6 py-3 font-semibold transition-all border-b-2 ${
-                mainTab === 'surveys'
+                activeTab === 'surveys'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-600 hover:text-gray-800'
               }`}
             >
               <ClipboardList className="w-5 h-5 inline mr-2" />
               Site Surveys
-            </button>
+            </button>}
             <button
               onClick={() => setMainTab('finance')}
               className={`px-6 py-3 font-semibold transition-all border-b-2 ${
-                mainTab === 'finance'
+                activeTab === 'finance'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-600 hover:text-gray-800'
               }`}
@@ -98,22 +112,22 @@ function App() {
               <DollarSign className="w-5 h-5 inline mr-2" />
               Finance
             </button>
-            <button
+            {!isDealer && <button
               onClick={() => setMainTab('reports')}
               className={`px-6 py-3 font-semibold transition-all border-b-2 ${
-                mainTab === 'reports'
+                activeTab === 'reports'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-600 hover:text-gray-800'
               }`}
             >
               <BarChart3 className="w-5 h-5 inline mr-2" />
               Reports
-            </button>
+            </button>}
           </div>
         </div>
       </nav>
 
-      {mainTab === 'surveys' && (
+      {activeTab === 'surveys' && (
         <div className="bg-gray-100 border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 py-2">
             <div className="flex gap-2">
@@ -142,7 +156,7 @@ function App() {
         </div>
       )}
 
-      {mainTab === 'pipelines' && (
+      {activeTab === 'pipelines' && (
         <div className="bg-gray-100 border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 py-2">
             <div className="flex gap-2">
@@ -206,36 +220,36 @@ function App() {
         </div>
       )}
 
-      {mainTab === 'finance' && (
+      {activeTab === 'finance' && (
         <div className="bg-gray-100 border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 py-2">
             <div className="flex gap-2">
-              <button
+              {!isDealer && <button
                 onClick={() => setFinanceView('products')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                  financeView === 'products'
+                  activeFinanceView === 'products'
                     ? 'bg-teal-600 text-white'
                     : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 <Package className="w-4 h-4" />
                 Products
-              </button>
-              <button
+              </button>}
+              {!isDealer && <button
                 onClick={() => setFinanceView('expenses')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                  financeView === 'expenses'
+                  activeFinanceView === 'expenses'
                     ? 'bg-amber-600 text-white'
                     : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 <DollarSign className="w-4 h-4" />
                 Expenses
-              </button>
+              </button>}
               <button
                 onClick={() => setFinanceView('quotations')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                  financeView === 'quotations'
+                  activeFinanceView === 'quotations'
                     ? 'bg-blue-600 text-white'
                     : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
@@ -246,7 +260,7 @@ function App() {
               <button
                 onClick={() => setFinanceView('invoices')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                  financeView === 'invoices'
+                  activeFinanceView === 'invoices'
                     ? 'bg-green-600 text-white'
                     : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
@@ -260,7 +274,7 @@ function App() {
       )}
 
       <main className="py-8 px-4">
-        {mainTab === 'surveys' && (
+        {activeTab === 'surveys' && (
           <>
             {surveyView === 'form' ? (
               <SurveyForm onSuccess={() => setSurveyView('list')} />
@@ -270,7 +284,7 @@ function App() {
           </>
         )}
 
-        {mainTab === 'pipelines' && (
+        {activeTab === 'pipelines' && (
           <>
             {pipelineView === 'sales' && <SalesPipeline />}
             {pipelineView === 'installation' && <InstallationPipeline />}
@@ -280,16 +294,18 @@ function App() {
           </>
         )}
 
-        {mainTab === 'finance' && (
+        {activeTab === 'finance' && (
           <>
-            {financeView === 'products' && <Products />}
-            {financeView === 'expenses' && <Expenses />}
-            {financeView === 'quotations' && <Quotations />}
-            {financeView === 'invoices' && <Invoices />}
+            {activeFinanceView === 'products' && <Products />}
+            {activeFinanceView === 'expenses' && <Expenses />}
+            {activeFinanceView === 'quotations' && <Quotations onConvertToInvoice={convertQuotationToInvoice} />}
+            {activeFinanceView === 'invoices' && (
+              <Invoices fromQuotation={pendingQuotation} onQuotationHandled={() => setPendingQuotation(null)} />
+            )}
           </>
         )}
 
-        {mainTab === 'reports' && <Reports />}
+        {activeTab === 'reports' && <Reports />}
       </main>
 
       <footer className="bg-white border-t border-gray-200 mt-12">

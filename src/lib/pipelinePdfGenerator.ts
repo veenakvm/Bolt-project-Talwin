@@ -21,6 +21,8 @@ interface ServiceEntry {
   complaint_resolution_status: string;
   comments: string;
   vendor_comments: string;
+  product_name?: string | null;
+  product_specs?: string | null;
   created_at: string;
 }
 
@@ -183,6 +185,24 @@ export function generateServicePDF(entry: ServiceEntry) {
   pdf.setFontSize(11);
   pdf.text('Service Details', 15, yPos);
   yPos += 8;
+
+  if (entry.product_name) {
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(9);
+    pdf.text('Product:', 15, yPos);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(entry.product_name, 60, yPos);
+    yPos += 5;
+    if (entry.product_specs) {
+      pdf.setFontSize(8);
+      const specLines: string[] = pdf.splitTextToSize(entry.product_specs, pageWidth - 75);
+      specLines.slice(0, 4).forEach((line) => {
+        pdf.text(line, 60, yPos);
+        yPos += 4;
+      });
+    }
+    yPos += 3;
+  }
 
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(9);

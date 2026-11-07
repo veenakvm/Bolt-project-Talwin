@@ -2,8 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { Plus, Search, FileText, Printer, CreditCard as Edit2, Trash2, X, Download } from 'lucide-react';
-import { toINR, numToWords, calculateLineItem, calculateInvoiceTotals, calculateGSTSummary, type LineItem } from '../lib/invoiceUtils';
+import {
+  toINR, numToWords, calculateInvoiceTotals, calculateGSTSummary, emptyLineItem,
+  CUSTOMER_TITLES, formatCustomerName, validateCustomerContact, type LineItem
+} from '../lib/invoiceUtils';
 import { generateInvoicePDF } from '../lib/pdfGeneratorNew';
+import LineItemsEditor, { type CatalogProduct } from './shared/LineItemsEditor';
+import LineItemsPreview from './shared/LineItemsPreview';
 
 interface Invoice {
   id: string;
@@ -11,6 +16,7 @@ interface Invoice {
   invoice_date: string;
   place_of_supply: string;
   pipeline_source: string;
+  customer_title?: string;
   customer_name: string;
   customer_contact: string;
   customer_gst_number?: string;
@@ -29,17 +35,6 @@ interface Invoice {
   line_items?: LineItem[];
 }
 
-interface Product {
-  id: string;
-  product_name: string;
-  hsn_sac_code: string;
-  mrp: number;
-  unit_price: number;
-  unit: string;
-  gst_rate: number;
-  description: string;
-}
-
 interface PipelineCustomer {
   id: string;
   customer_name: string;
@@ -47,10 +42,30 @@ interface PipelineCustomer {
   pipeline_source: string;
 }
 
-export default function Invoices() {
+/** A quotation being converted into an invoice (passed in from the Quotations screen). */
+export interface QuotationForInvoice {
+  id: string;
+  estimate_number: string;
+  place_of_supply: string;
+  pipeline_source: string;
+  customer_title?: string;
+  customer_name: string;
+  contact_number: string;
+  customer_gst_number?: string;
+  customer_address?: string;
+  billing_address?: string;
+  line_items?: LineItem[];
+}
+
+interface InvoicesProps {
+  fromQuotation?: QuotationForInvoice | null;
+  onQuotationHandled?: () => void;
+}
+
+export default function Invoices({ fromQuotation, onQuotationHandled }: InvoicesProps = {}) {
   const { user } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<CatalogProduct[]>([]);
   const [customers, setCustomers] = useState<PipelineCustomer[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -58,52 +73,60 @@ export default function Invoices() {
   const [searchQuery, setSearchQuery] = useState('');
   const [pipelineFilter, setPipelineFilter] = useState('');
   const [viewInvoice, setViewInvoice] = useState<Invoice | null>(null);
-  const [editingTerms, setEditingTerms] = useState(false);
-  const [termsEditValue, setTermsEditValue] = useState('');
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
-
-  const defaultInvoiceTerms = `• Payment Terms: 100% before Dispatch.
-• Invoice valid for 7 days from date of issue.
-• Electrical / Civil / External Plumbing and Lifting of Materials — Customer scope.
-• All Sales Are Final. No Refunds or Exchanges.
-• All disputes are subject to Bengaluru jurisdiction.
-• Warranty: 1 Year warranty applicable as per Company Norms & Service at Authorized Service Center / As mentioned in warranty card.`;
 
   const [formData, setFormData] = useState({
     invoice_date: new Date().toISOString().split('T')[0],
     place_of_supply: '29-Karnataka',
     pipeline_source: 'Sales',
+    customer_title: '',
     customer_name: '',
     customer_contact: '',
     customer_gst_number: '',
     customer_address: '',
     billing_address: '',
     eway_bill_number: '',
-    advance_paid: 0,
-    terms_conditions: defaultInvoiceTerms
+    advance_paid: 0
   });
 
-  const [lineItems, setLineItems] = useState<LineItem[]>([
-    {
-      id: crypto.randomUUID(),
-      item_name: '',
-      item_description: '',
-      hsn_sac: '',
-      mrp: 0,
-      quantity: 1,
-      unit: 'Pcs',
-      price_per_unit: 0,
-      gst_rate: 18,
-      gst_amount: 0,
-      total_amount: 0
-    }
-  ]);
+  const [lineItems, setLineItems] = useState<LineItem[]>([emptyLineItem()]);
+  // Quotation this invoice is being created from, if any.
+  const [sourceQuotationId, setSourceQuotationId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchInvoices();
     fetchProducts();
     fetchCustomers();
   }, []);
+
+  // Open a pre-filled invoice form when a quotation is converted.
+  useEffect(() => {
+    if (!fromQuotation) return;
+    setEditingId(null);
+    setViewInvoice(null);
+    setSelectedCustomerId('');
+    setSourceQuotationId(fromQuotation.id);
+    setFormData({
+      invoice_date: new Date().toISOString().split('T')[0],
+      place_of_supply: fromQuotation.place_of_supply || '29-Karnataka',
+      pipeline_source: fromQuotation.pipeline_source || 'Sales',
+      customer_title: fromQuotation.customer_title || '',
+      customer_name: fromQuotation.customer_name,
+      customer_contact: fromQuotation.contact_number || '',
+      customer_gst_number: fromQuotation.customer_gst_number || '',
+      customer_address: fromQuotation.customer_address || '',
+      billing_address: fromQuotation.billing_address || '',
+      eway_bill_number: '',
+      advance_paid: 0
+    });
+    setLineItems(
+      fromQuotation.line_items && fromQuotation.line_items.length
+        ? fromQuotation.line_items.map(item => ({ ...item, id: crypto.randomUUID() }))
+        : [emptyLineItem()]
+    );
+    setShowForm(true);
+    onQuotationHandled?.();
+  }, [fromQuotation]);
 
   const fetchInvoices = async () => {
     try {
@@ -201,60 +224,6 @@ export default function Invoices() {
     }
   };
 
-  const handleProductSelect = (index: number, productId: string) => {
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
-
-    console.log('🔵 Product selected:', product.product_name);
-
-    const updated = [...lineItems];
-    updated[index] = calculateLineItem({
-      ...updated[index],
-      item_name: product.product_name,
-      item_description: product.description || '',
-      hsn_sac: product.hsn_sac_code || '',
-      mrp: product.mrp || 0,
-      price_per_unit: product.unit_price || 0,
-      unit: product.unit || 'Pcs',
-      gst_rate: product.gst_rate ?? 18
-    });
-    setLineItems(updated);
-    console.log('📦 Line items after product select:', updated);
-  };
-
-  const updateLineItem = (index: number, field: keyof LineItem, value: any) => {
-    const updated = [...lineItems];
-    updated[index] = calculateLineItem({
-      ...updated[index],
-      [field]: value
-    });
-    setLineItems(updated);
-  };
-
-  const addLineItem = () => {
-    setLineItems([...lineItems, {
-      id: crypto.randomUUID(),
-      item_name: '',
-      item_description: '',
-      hsn_sac: '',
-      mrp: 0,
-      quantity: 1,
-      unit: 'Pcs',
-      price_per_unit: 0,
-      gst_rate: 18,
-      gst_amount: 0,
-      total_amount: 0
-    }]);
-  };
-
-  const removeLineItem = (index: number) => {
-    if (lineItems.length === 1) {
-      alert('Need at least one item');
-      return;
-    }
-    setLineItems(lineItems.filter((_, i) => i !== index));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -264,6 +233,12 @@ export default function Invoices() {
 
     if (!formData.customer_name.trim()) {
       alert('Enter customer name');
+      return;
+    }
+
+    const contactError = validateCustomerContact(formData.customer_contact, formData.customer_address);
+    if (contactError) {
+      alert(contactError);
       return;
     }
 
@@ -295,13 +270,13 @@ export default function Invoices() {
             invoice_date: formData.invoice_date,
             place_of_supply: formData.place_of_supply,
             pipeline_source: formData.pipeline_source,
+            customer_title: formData.customer_title,
             customer_name: formData.customer_name,
             customer_contact: formData.customer_contact,
             customer_gst_number: formData.customer_gst_number,
             customer_address: formData.customer_address,
             billing_address: formData.billing_address,
             eway_bill_number: formData.eway_bill_number,
-            terms_conditions: formData.terms_conditions,
             line_items: lineItems,
             taxable_amount: totals.taxableAmount,
             gst_total: totals.gstTotal,
@@ -324,7 +299,7 @@ export default function Invoices() {
         console.log('➕ CREATING new invoice', invoiceNumber);
         console.log('📤 Sending line_items:', lineItems);
 
-        const { error: invError } = await supabase
+        const { data: created, error: invError } = await supabase
           .from('invoices')
           .insert([{
             user_id: user?.id,
@@ -332,13 +307,13 @@ export default function Invoices() {
             invoice_date: formData.invoice_date,
             place_of_supply: formData.place_of_supply,
             pipeline_source: formData.pipeline_source,
+            customer_title: formData.customer_title,
             customer_name: formData.customer_name,
             customer_contact: formData.customer_contact,
             customer_gst_number: formData.customer_gst_number,
             customer_address: formData.customer_address,
             billing_address: formData.billing_address,
             eway_bill_number: formData.eway_bill_number,
-            terms_conditions: formData.terms_conditions,
             line_items: lineItems,
             taxable_amount: totals.taxableAmount,
             gst_total: totals.gstTotal,
@@ -353,6 +328,14 @@ export default function Invoices() {
 
         if (invError) throw invError;
         console.log('✅ Invoice created successfully');
+
+        if (sourceQuotationId && created) {
+          const { error: linkError } = await supabase
+            .from('quotations')
+            .update({ converted_invoice_id: created.id })
+            .eq('id', sourceQuotationId);
+          if (linkError) console.error('Could not mark quotation as converted:', linkError.message);
+        }
       }
 
       resetForm();
@@ -374,14 +357,14 @@ export default function Invoices() {
       invoice_date: invoice.invoice_date,
       place_of_supply: invoice.place_of_supply,
       pipeline_source: invoice.pipeline_source,
+      customer_title: invoice.customer_title || '',
       customer_name: invoice.customer_name,
       customer_contact: invoice.customer_contact,
       customer_gst_number: invoice.customer_gst_number || '',
       customer_address: invoice.customer_address || '',
       billing_address: invoice.billing_address || '',
       eway_bill_number: invoice.eway_bill_number || '',
-      advance_paid: invoice.advance_paid || 0,
-      terms_conditions: invoice.terms_conditions || defaultInvoiceTerms
+      advance_paid: invoice.advance_paid || 0
     });
     setLineItems(invoice.line_items || []);
     setShowForm(true);
@@ -405,25 +388,9 @@ export default function Invoices() {
     }
   };
 
-  const saveInvoiceTerms = async () => {
-    if (!viewInvoice) return;
-    const { error } = await supabase
-      .from('invoices')
-      .update({ terms_conditions: termsEditValue })
-      .eq('id', viewInvoice.id);
-    if (!error) {
-      const updated = { ...viewInvoice, terms_conditions: termsEditValue };
-      setViewInvoice(updated);
-      setInvoices(prev => prev.map(inv => inv.id === viewInvoice.id ? updated : inv));
-      setEditingTerms(false);
-    }
-  };
-
   const downloadInvoicePDF = async (invoice: Invoice) => {
     await generateInvoicePDF({
       ...invoice,
-      customer_gst_number: invoice.customer_gst_number,
-      terms_conditions: invoice.terms_conditions,
       advance_paid: invoice.advance_paid || 0,
       balance_due: invoice.balance_due || invoice.grand_total
     });
@@ -432,33 +399,22 @@ export default function Invoices() {
   const resetForm = () => {
     setShowForm(false);
     setEditingId(null);
+    setSourceQuotationId(null);
     setSelectedCustomerId('');
     setFormData({
       invoice_date: new Date().toISOString().split('T')[0],
       place_of_supply: '29-Karnataka',
       pipeline_source: 'Sales',
+      customer_title: '',
       customer_name: '',
       customer_contact: '',
       customer_gst_number: '',
       customer_address: '',
       billing_address: '',
       eway_bill_number: '',
-      advance_paid: 0,
-      terms_conditions: defaultInvoiceTerms
+      advance_paid: 0
     });
-    setLineItems([{
-      id: crypto.randomUUID(),
-      item_name: '',
-      item_description: '',
-      hsn_sac: '',
-      mrp: 0,
-      quantity: 1,
-      unit: 'Pcs',
-      price_per_unit: 0,
-      gst_rate: 18,
-      gst_amount: 0,
-      total_amount: 0
-    }]);
+    setLineItems([emptyLineItem()]);
   };
 
   const totals = calculateInvoiceTotals(lineItems);
@@ -568,7 +524,7 @@ export default function Invoices() {
                           {new Date(invoice.invoice_date).toLocaleDateString()}
                         </td>
                         <td className="px-4 py-3 text-sm">
-                          <div className="font-medium text-gray-900">{invoice.customer_name}</div>
+                          <div className="font-medium text-gray-900">{formatCustomerName(invoice.customer_title, invoice.customer_name)}</div>
                           {invoice.customer_contact && (
                             <div className="text-xs text-gray-500">{invoice.customer_contact}</div>
                           )}
@@ -582,7 +538,7 @@ export default function Invoices() {
                         <td className="px-4 py-3 text-sm">
                           <div className="flex gap-2">
                             <button
-                              onClick={() => { setViewInvoice(invoice); setEditingTerms(false); }}
+                              onClick={() => setViewInvoice(invoice)}
                               className="text-blue-600 hover:text-blue-700 p-1"
                               title="View"
                             >
@@ -627,6 +583,11 @@ export default function Invoices() {
             <h2 className="text-2xl font-bold text-gray-900">
               {editingId ? 'Edit Invoice' : 'New Invoice'}
             </h2>
+            {sourceQuotationId && (
+              <span className="ml-3 mr-auto text-sm bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
+                From quotation — check the details and add e-way bill / advance before saving
+              </span>
+            )}
             <button
               onClick={resetForm}
               className="text-gray-500 hover:text-gray-700"
@@ -666,19 +627,31 @@ export default function Invoices() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Customer Name *</label>
-                  <input
-                    type="text"
-                    value={formData.customer_name}
-                    onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                    placeholder="Enter customer name"
-                  />
+                  <div className="flex gap-2">
+                    <select
+                      value={formData.customer_title}
+                      onChange={(e) => setFormData({ ...formData, customer_title: e.target.value })}
+                      className="w-24 px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      aria-label="Title"
+                    >
+                      <option value="">Title</option>
+                      {CUSTOMER_TITLES.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                    <input
+                      type="text"
+                      value={formData.customer_name}
+                      onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
+                      className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                      placeholder="Enter customer name"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Customer Phone Number</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Customer Phone Number *</label>
                   <input
-                    type="text"
+                    type="tel"
+                    required
                     value={formData.customer_contact}
                     onChange={(e) => setFormData({ ...formData, customer_contact: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -686,8 +659,9 @@ export default function Invoices() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Customer Address</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Customer Address *</label>
                   <textarea
+                    required
                     value={formData.customer_address}
                     onChange={(e) => setFormData({ ...formData, customer_address: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -731,137 +705,7 @@ export default function Invoices() {
 
             <div>
               <h3 className="text-sm font-bold text-gray-700 uppercase mb-3">Line Items</h3>
-              <div className="overflow-x-auto border border-gray-200 rounded-lg">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-800 text-white">
-                    <tr>
-                      <th className="px-2 py-2 text-left">#</th>
-                      <th className="px-2 py-2 text-left min-w-[200px]">Product / Item</th>
-                      <th className="px-2 py-2 text-left">HSN/SAC</th>
-                      <th className="px-2 py-2 text-left">MRP</th>
-                      <th className="px-2 py-2 text-left">Qty</th>
-                      <th className="px-2 py-2 text-left">Unit</th>
-                      <th className="px-2 py-2 text-left">Price/Unit</th>
-                      <th className="px-2 py-2 text-left">GST%</th>
-                      <th className="px-2 py-2 text-right">GST Amt</th>
-                      <th className="px-2 py-2 text-right">Total</th>
-                      <th className="px-2 py-2"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {lineItems.map((item, index) => (
-                      <tr key={item.id} className="border-b border-gray-200">
-                        <td className="px-2 py-2 text-center text-gray-500">{index + 1}</td>
-                        <td className="px-2 py-2">
-                          <select
-                            onChange={(e) => handleProductSelect(index, e.target.value)}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs mb-1"
-                          >
-                            <option value="">-- Select from catalog --</option>
-                            {products.map(p => (
-                              <option key={p.id} value={p.id}>{p.product_name}</option>
-                            ))}
-                          </select>
-                          <input
-                            type="text"
-                            value={item.item_name}
-                            onChange={(e) => updateLineItem(index, 'item_name', e.target.value)}
-                            placeholder="Item name"
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                          />
-                        </td>
-                        <td className="px-2 py-2">
-                          <input
-                            type="text"
-                            value={item.hsn_sac || ''}
-                            onChange={(e) => updateLineItem(index, 'hsn_sac', e.target.value)}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                          />
-                        </td>
-                        <td className="px-2 py-2">
-                          <input
-                            type="number"
-                            value={item.mrp || ''}
-                            onChange={(e) => updateLineItem(index, 'mrp', parseFloat(e.target.value))}
-                            className="w-20 px-2 py-1 border border-gray-300 rounded text-xs"
-                          />
-                        </td>
-                        <td className="px-2 py-2">
-                          <input
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) => updateLineItem(index, 'quantity', parseFloat(e.target.value))}
-                            className="w-16 px-2 py-1 border border-gray-300 rounded text-xs"
-                            min="1"
-                          />
-                        </td>
-                        <td className="px-2 py-2">
-                          <select
-                            value={item.unit}
-                            onChange={(e) => updateLineItem(index, 'unit', e.target.value)}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                          >
-                            <option>Pcs</option>
-                            <option>Set</option>
-                            <option>Nos</option>
-                            <option>KW</option>
-                            <option>LPH</option>
-                            <option>Litre</option>
-                            <option>HP</option>
-                            <option>LPD</option>
-                            <option>-</option>
-                          </select>
-                        </td>
-                        <td className="px-2 py-2">
-                          <input
-                            type="number"
-                            value={item.price_per_unit}
-                            onChange={(e) => updateLineItem(index, 'price_per_unit', parseFloat(e.target.value))}
-                            className="w-24 px-2 py-1 border border-gray-300 rounded text-xs"
-                            step="0.01"
-                          />
-                        </td>
-                        <td className="px-2 py-2">
-                          <select
-                            value={item.gst_rate}
-                            onChange={(e) => updateLineItem(index, 'gst_rate', parseFloat(e.target.value))}
-                            className="w-16 px-2 py-1 border border-gray-300 rounded text-xs"
-                          >
-                            <option>0</option>
-                            <option>5</option>
-                            <option>8.9</option>
-                            <option>12</option>
-                            <option>18</option>
-                            <option>28</option>
-                          </select>
-                        </td>
-                        <td className="px-2 py-2 text-right text-xs font-semibold">
-                          {item.gst_amount.toFixed(2)}
-                        </td>
-                        <td className="px-2 py-2 text-right text-xs font-semibold">
-                          {item.total_amount.toFixed(2)}
-                        </td>
-                        <td className="px-2 py-2 text-center">
-                          <button
-                            type="button"
-                            onClick={() => removeLineItem(index)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <button
-                type="button"
-                onClick={addLineItem}
-                className="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
-              >
-                + Add Row
-              </button>
+              <LineItemsEditor items={lineItems} products={products} onChange={setLineItems} />
             </div>
 
             <div className="flex justify-end">
@@ -905,17 +749,6 @@ export default function Invoices() {
                   </div>
                 )}
               </div>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-bold text-gray-700 uppercase mb-3">Terms &amp; Conditions</h3>
-              <textarea
-                value={formData.terms_conditions}
-                onChange={(e) => setFormData({ ...formData, terms_conditions: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
-                rows={6}
-                placeholder="Enter terms and conditions..."
-              />
             </div>
 
             <div className="flex gap-4 justify-end">
@@ -986,7 +819,7 @@ export default function Invoices() {
 
                 <div className="bg-gray-50 border-l-4 border-blue-600 p-3 mb-4 rounded-r">
                   <div className="text-xs text-gray-600 font-bold uppercase mb-1">Invoice For</div>
-                  <div className="font-bold text-sm">{viewInvoice.customer_name}</div>
+                  <div className="font-bold text-sm">{formatCustomerName(viewInvoice.customer_title, viewInvoice.customer_name)}</div>
                   {viewInvoice.customer_contact && (
                     <div className="text-xs text-gray-600 mt-1">Contact: {viewInvoice.customer_contact}</div>
                   )}
@@ -1001,53 +834,7 @@ export default function Invoices() {
                   )}
                 </div>
 
-                <table className="w-full mb-4 text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-gray-800 text-white">
-                      <th className="p-2 text-left">#</th>
-                      <th className="p-2 text-left">Item Name & Description</th>
-                      <th className="p-2 text-left">HSN/SAC</th>
-                      <th className="p-2 text-right">MRP</th>
-                      <th className="p-2 text-right">Qty</th>
-                      <th className="p-2 text-left">Unit</th>
-                      <th className="p-2 text-right">Price/Unit</th>
-                      <th className="p-2 text-right">GST</th>
-                      <th className="p-2 text-right">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {viewInvoice.line_items?.map((item, i) => (
-                      <tr key={i} className="border-b border-gray-200">
-                        <td className="p-2 text-center text-gray-500">{i + 1}</td>
-                        <td className="p-2">
-                          <div className="font-semibold">{item.item_name}</div>
-                          {item.item_description && (
-                            <div className="text-xs text-gray-500">{item.item_description}</div>
-                          )}
-                        </td>
-                        <td className="p-2 text-gray-600">{item.hsn_sac || '—'}</td>
-                        <td className="p-2 text-right">{item.mrp ? item.mrp.toFixed(2) : '—'}</td>
-                        <td className="p-2 text-right">{item.quantity}</td>
-                        <td className="p-2">{item.unit}</td>
-                        <td className="p-2 text-right">₹{item.price_per_unit.toFixed(2)}</td>
-                        <td className="p-2 text-right text-xs">
-                          ₹{item.gst_amount.toFixed(2)}<br />
-                          <span className="text-gray-500">({item.gst_rate}%)</span>
-                        </td>
-                        <td className="p-2 text-right font-semibold">₹{item.total_amount.toFixed(2)}</td>
-                      </tr>
-                    ))}
-                    <tr className="bg-gray-100 font-bold border-t-2 border-b-2 border-gray-800">
-                      <td colSpan={4}></td>
-                      <td className="p-2 text-right">
-                        {viewInvoice.line_items?.reduce((sum, item) => sum + item.quantity, 0)}
-                      </td>
-                      <td colSpan={2}></td>
-                      <td className="p-2 text-right">₹{viewInvoice.gst_total.toFixed(2)}</td>
-                      <td className="p-2 text-right">₹{viewInvoice.sub_total.toFixed(2)}</td>
-                    </tr>
-                  </tbody>
-                </table>
+                <LineItemsPreview items={viewInvoice.line_items || []} gstTotal={viewInvoice.gst_total} />
 
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div className="bg-gray-50 rounded p-3">
@@ -1146,50 +933,9 @@ export default function Invoices() {
                     </p>
                   </div>
                   <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <h4 className="font-bold uppercase">Terms & Conditions</h4>
-                      {!editingTerms && (
-                        <button
-                          onClick={() => {
-                            setTermsEditValue(viewInvoice.terms_conditions || defaultInvoiceTerms);
-                            setEditingTerms(true);
-                          }}
-                          className="text-blue-500 hover:text-blue-700 p-0.5 rounded"
-                          title="Edit Terms & Conditions"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                    {editingTerms ? (
-                      <div>
-                        <textarea
-                          value={termsEditValue}
-                          onChange={(e) => setTermsEditValue(e.target.value)}
-                          className="w-full px-2 py-1.5 border border-blue-300 rounded text-xs font-mono focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none"
-                          rows={7}
-                          autoFocus
-                        />
-                        <div className="flex gap-2 mt-1.5">
-                          <button
-                            onClick={saveInvoiceTerms}
-                            className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 font-medium"
-                          >
-                            Save
-                          </button>
-                          <button
-                            onClick={() => setEditingTerms(false)}
-                            className="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded hover:bg-gray-200"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="leading-relaxed text-gray-600 whitespace-pre-line">
-                        {viewInvoice.terms_conditions || defaultInvoiceTerms}
-                      </p>
-                    )}
+                    <h4 className="font-bold uppercase mb-2">Terms & Conditions</h4>
+                    {/* Left blank on purpose: terms are written in by hand on the printed copy. */}
+                    <div className="h-24 border border-gray-300 rounded" />
                   </div>
                   <div className="text-right">
                     <h4 className="font-bold uppercase mb-2">For: Talwin AquaRay</h4>

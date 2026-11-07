@@ -252,7 +252,7 @@ export default function Products() {
 
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
+              Description / Specs
             </label>
             <textarea
               value={formData.description}
@@ -297,7 +297,7 @@ export default function Products() {
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product Name</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">HSN/SAC</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description / Specs</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unit</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">MRP</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unit Price</th>
@@ -442,7 +442,7 @@ export default function Products() {
 
                           <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Description
+                              Description / Specs
                             </label>
                             <textarea
                               value={editFormData.description || ''}
