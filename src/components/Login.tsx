@@ -28,7 +28,11 @@ export default function Login() {
     setError('');
     setLoading(true);
     const { error } = await signIn(email, password);
-    if (error) setError('Invalid email or password');
+    if (error) {
+      setError(error.message === 'Invalid login credentials'
+        ? 'Invalid email or password'
+        : `Sign-in failed: ${error.message}`);
+    }
     setLoading(false);
   };
 
