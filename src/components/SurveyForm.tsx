@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { CheckSquare, Square, Save, FileText, Plus, X } from 'lucide-react';
+import { CheckSquare, Square, Save, Plus, X } from 'lucide-react';
 import ProductPicker from './shared/ProductPicker';
 import type { SurveyProduct } from './shared/surveyProducts';
 
@@ -181,24 +181,21 @@ export default function SurveyForm({ onSuccess }: SurveyFormProps) {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="bg-white rounded-lg shadow-lg">
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-8 rounded-t-lg">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <FileText className="w-8 h-8" />
-            <h1 className="text-3xl font-bold">TALWIN AquaRay</h1>
+      <div className="bg-white rounded-xl border border-gray-200 shadow-card">
+        <div className="bg-brand-700 text-white px-6 py-6 sm:px-8 rounded-t-xl flex items-center gap-4">
+          <div className="h-14 w-14 rounded-lg bg-white p-1.5 shrink-0">
+            <img src={`${import.meta.env.BASE_URL}talwin-logo.jpeg`} alt="Talwin AquaRay logo" className="h-full w-full object-contain" />
           </div>
-          <p className="text-center text-blue-100">
-            89040 69224 | www.talwin.in | info@talwin.in
-          </p>
-          <h2 className="text-center text-2xl font-semibold mt-4">
-            TECHNICIAN SITE SURVEY CHECKLIST
-          </h2>
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Technician Site Survey Checklist</h1>
+            <p className="mt-1 text-sm text-brand-200">TALWIN AquaRay · 89040 69224 · www.talwin.in · info@talwin.in</p>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="p-8 space-y-8">
           {/* 1. BASIC DETAILS */}
           <section>
-            <h3 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-blue-600">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">
               1. BASIC DETAILS
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -291,7 +288,7 @@ export default function SurveyForm({ onSuccess }: SurveyFormProps) {
 
           {/* 2. WATER SOURCE */}
           <section>
-            <h3 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-blue-600">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">
               2. WATER SOURCE
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -383,7 +380,7 @@ export default function SurveyForm({ onSuccess }: SurveyFormProps) {
 
           {/* 3. WATER & PRESSURE */}
           <section>
-            <h3 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-blue-600">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">
               3. WATER & PRESSURE
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -495,7 +492,7 @@ export default function SurveyForm({ onSuccess }: SurveyFormProps) {
 
           {/* 4. PRODUCTS REQUIRED */}
           <section>
-            <h3 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-blue-600">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">
               4. PRODUCTS REQUIRED
             </h3>
             <div className="space-y-3">
@@ -713,7 +710,7 @@ export default function SurveyForm({ onSuccess }: SurveyFormProps) {
 
           {/* 5. INSTALL CHECK */}
           <section>
-            <h3 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-blue-600">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">
               5. INSTALL CHECK
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -815,7 +812,7 @@ export default function SurveyForm({ onSuccess }: SurveyFormProps) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 rounded-lg font-semibold text-lg hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg"
+            className="w-full bg-brand-600 text-white py-3 rounded-lg font-semibold hover:bg-brand-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
           >
             <Save className="w-5 h-5" />
             {loading ? 'Submitting...' : 'Submit Survey'}

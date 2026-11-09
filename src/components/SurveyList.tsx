@@ -291,9 +291,9 @@ export default function SurveyList() {
           </button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
-            <h2 className="text-2xl font-bold">Survey Details</h2>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-card overflow-hidden">
+          <div className="bg-brand-700 text-white p-6">
+            <h2 className="text-xl font-semibold text-gray-900">Survey Details</h2>
             <p className="text-blue-100 mt-1">
               Submitted on {new Date(selectedSurvey.created_at).toLocaleString()}
             </p>
@@ -559,7 +559,7 @@ export default function SurveyList() {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">Site Survey Records</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-1">Site Survey Records</h2>
         <p className="text-gray-600">View all submitted site survey checklists</p>
       </div>
 
@@ -587,9 +587,9 @@ export default function SurveyList() {
           {filteredSurveys.map((survey) => (
             <div
               key={survey.id}
-              className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden"
+              className="bg-white rounded-xl border border-gray-200 shadow-card hover:border-gray-300 transition-colors overflow-hidden"
             >
-              <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4">
+              <div className="bg-brand-700 text-white p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <User className="w-5 h-5" />
                   <h3 className="font-bold text-lg">{survey.customer || 'Unknown'}</h3>

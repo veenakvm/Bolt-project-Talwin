@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Search, Plus, CreditCard as Edit2, X, Save, Trash2, Copy } from 'lucide-react';
+import { Search, Plus, Pencil as Edit2, X, Save, Trash2, Copy } from 'lucide-react';
 
 interface Vendor {
   id: string;
@@ -154,11 +154,11 @@ export default function Vendors() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Vendors</h1>
+        <h1 className="text-2xl font-semibold text-gray-900 mb-1">Vendors</h1>
         <p className="text-gray-600">Manage your vendor contacts</p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6 mb-6">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Vendor</h2>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
@@ -272,7 +272,7 @@ export default function Vendors() {
         </form>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-gray-800">
             Vendors ({filteredVendors.length})

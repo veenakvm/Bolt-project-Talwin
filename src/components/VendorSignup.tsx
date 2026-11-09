@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, UserPlus, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Props {
@@ -7,7 +7,7 @@ interface Props {
 }
 
 const inputClass =
-  'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent';
+  'w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent';
 
 /** Vendors register here; their account stays "pending" until staff approve it. */
 export default function VendorSignup({ onBack }: Props) {
@@ -85,12 +85,9 @@ export default function VendorSignup({ onBack }: Props) {
         <ArrowLeft className="w-4 h-4" /> Back to sign in
       </button>
 
-      <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-          <UserPlus className="w-8 h-8 text-blue-600" />
-        </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Vendor Registration</h1>
-        <p className="text-gray-600 text-sm">
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Vendor registration</h1>
+        <p className="mt-1 text-gray-600 text-sm">
           Register for the Talwin vendor portal. Talwin staff will approve your account before you can use it.
         </p>
       </div>
@@ -128,7 +125,7 @@ export default function VendorSignup({ onBack }: Props) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+          className="w-full bg-brand-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
         >
           {loading ? 'Registering...' : 'Register'}
         </button>

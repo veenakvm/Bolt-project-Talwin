@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Search, Plus, CreditCard as Edit2, X, Save, Trash2, Download } from 'lucide-react';
+import { Search, Plus, Pencil as Edit2, X, Save, Trash2, Download } from 'lucide-react';
 import { generateServicePDF } from '../lib/pipelinePdfGenerator';
 import ProductPicker from './shared/ProductPicker';
 
@@ -182,7 +182,7 @@ export default function ComplaintPipeline() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+      <div className="bg-blue-50 border border-blue-200 p-4 mb-6">
         <div className="flex items-center justify-between">
           <p className="text-sm text-blue-700">
             <strong>Customer Feedback:</strong> Share this feedback form link with customers to collect their reviews and testimonials.
@@ -198,8 +198,8 @@ export default function ComplaintPipeline() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
           <Plus className="w-6 h-6 text-orange-600" />
           New Complaint Entry
         </h3>
@@ -391,9 +391,9 @@ export default function ComplaintPipeline() {
         </form>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold text-gray-800">Complaint Pipeline Entries</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Complaint Pipeline Entries</h3>
           <span className="text-sm text-gray-600">{filteredEntries.length} entries</span>
         </div>
 
@@ -414,14 +414,14 @@ export default function ComplaintPipeline() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Customer</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Phone</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Product</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Service Type</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Resolution</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Date</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Customer</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Phone</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Product</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Service Type</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Resolution</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">

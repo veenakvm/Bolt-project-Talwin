@@ -79,7 +79,7 @@ export default function UserAccess() {
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">User Access</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">User Access</h1>
           <p className="text-gray-600 mt-1">
             Vendors register from the login page with "Register here". Approve them here before they can log in.
           </p>
@@ -103,7 +103,7 @@ export default function UserAccess() {
           const rows = profiles.filter(p => p.role === section.role);
           const Icon = section.icon;
           return (
-            <div key={section.role} className="bg-white rounded-lg shadow-md p-6">
+            <div key={section.role} className="bg-white rounded-xl border border-gray-200 shadow-card p-6">
               <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2 mb-4">
                 <Icon className="w-5 h-5" />
                 {section.title}

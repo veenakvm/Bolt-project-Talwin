@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Plus, Search, FileText, Printer, CreditCard as Edit2, Trash2, X, Download, ArrowRightCircle, CheckCircle } from 'lucide-react';
+import { Plus, Search, FileText, Printer, Pencil as Edit2, Trash2, X, Download, ArrowRightCircle, CheckCircle } from 'lucide-react';
 import {
   toINR, numToWords, calculateInvoiceTotals, calculateGSTSummary, emptyLineItem,
   CUSTOMER_TITLES, formatCustomerName, validateCustomerContact, type LineItem
@@ -384,12 +384,12 @@ export default function Quotations({ onConvertToInvoice }: QuotationsProps = {})
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Quotations</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">Quotations</h1>
           <p className="text-gray-600 mt-1">Manage quotations and estimates</p>
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center gap-2"
+          className="bg-blue-500 text-white px-4 py-2.5 rounded-lg text-sm hover:bg-blue-600 transition-colors font-medium flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
           New Quotation
@@ -398,30 +398,30 @@ export default function Quotations({ onConvertToInvoice }: QuotationsProps = {})
 
       {!showForm && !viewQuotation && (
         <>
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-4 text-white">
-                <div className="text-sm opacity-90">Total Quotations</div>
-                <div className="text-3xl font-bold mt-1">{quotations.length}</div>
+              <div className="rounded-lg bg-gray-50 border border-gray-100 p-4 text-gray-900">
+                <div className="text-sm text-gray-500">Total Quotations</div>
+                <div className="text-2xl font-semibold text-gray-900 mt-1">{quotations.length}</div>
               </div>
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-4 text-white">
-                <div className="text-sm opacity-90">Total Estimated</div>
-                <div className="text-2xl font-bold mt-1">
+              <div className="rounded-lg bg-gray-50 border border-gray-100 p-4 text-gray-900">
+                <div className="text-sm text-gray-500">Total Estimated</div>
+                <div className="text-xl font-semibold text-gray-900 mt-1">
                   {toINR(quotations.reduce((sum, quo) => sum + Number(quo.grand_total), 0))}
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-4 text-white">
-                <div className="text-sm opacity-90">This Month</div>
-                <div className="text-2xl font-bold mt-1">
+              <div className="rounded-lg bg-gray-50 border border-gray-100 p-4 text-gray-900">
+                <div className="text-sm text-gray-500">This Month</div>
+                <div className="text-xl font-semibold text-gray-900 mt-1">
                   {toINR(quotations
                     .filter(quo => quo.date.startsWith(new Date().toISOString().slice(0, 7)))
                     .reduce((sum, quo) => sum + Number(quo.grand_total), 0)
                   )}
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg p-4 text-white">
-                <div className="text-sm opacity-90">Last Quotation</div>
-                <div className="text-xl font-bold mt-1">
+              <div className="rounded-lg bg-gray-50 border border-gray-100 p-4 text-gray-900">
+                <div className="text-sm text-gray-500">Last Quotation</div>
+                <div className="text-xl font-semibold text-gray-900 mt-1">
                   {quotations.length > 0 ? quotations[0].estimate_number : '—'}
                 </div>
               </div>
@@ -444,12 +444,12 @@ export default function Quotations({ onConvertToInvoice }: QuotationsProps = {})
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Quotation No.</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Date</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Customer</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Items</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase">Grand Total</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Quotation No.</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Customer</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Items</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Grand Total</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -537,7 +537,7 @@ export default function Quotations({ onConvertToInvoice }: QuotationsProps = {})
       )}
 
       {showForm && (
-        <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900">
               {editingId ? 'Edit Quotation' : 'New Quotation'}
@@ -709,7 +709,7 @@ export default function Quotations({ onConvertToInvoice }: QuotationsProps = {})
 
       {viewQuotation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-direction-column overflow-hidden">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-direction-column overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <h3 className="text-xl font-bold">Quotation {viewQuotation.estimate_number}</h3>
               <button
@@ -754,7 +754,7 @@ export default function Quotations({ onConvertToInvoice }: QuotationsProps = {})
                   </div>
                 </div>
 
-                <div className="bg-gray-50 border-l-4 border-blue-600 p-3 mb-4 rounded-r">
+                <div className="bg-gray-50 border border-blue-200 p-3 mb-4 rounded-r">
                   <div className="text-xs text-gray-600 font-bold uppercase mb-1">Quotation For</div>
                   <div className="font-bold text-sm">{formatCustomerName(viewQuotation.customer_title, viewQuotation.customer_name)}</div>
                   {viewQuotation.contact_number && (
@@ -902,7 +902,7 @@ export default function Quotations({ onConvertToInvoice }: QuotationsProps = {})
                     onConvertToInvoice(viewQuotation);
                     setViewQuotation(null);
                   }}
-                  className="px-4 py-2 bg-amber-500 text-gray-900 rounded-lg hover:bg-amber-600 transition-colors font-medium"
+                  className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-medium"
                 >
                   Convert to Invoice
                 </button>

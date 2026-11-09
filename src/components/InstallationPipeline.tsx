@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Search, Plus, CreditCard as Edit2, X, Save, Trash2, Download } from 'lucide-react';
+import { Search, Plus, Pencil as Edit2, X, Save, Trash2, Download } from 'lucide-react';
 import { generateInstallationPDF } from '../lib/pipelinePdfGenerator';
 
 const PROFESSION_OPTIONS = ['Architect', 'Plumber', 'Contractor', 'Electrician'];
@@ -171,7 +171,7 @@ export default function InstallationPipeline() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+      <div className="bg-blue-50 border border-blue-200 p-4 mb-6">
         <div className="flex items-center justify-between">
           <p className="text-sm text-blue-700">
             <strong>Customer Feedback:</strong> Share this feedback form link with customers to collect their reviews and testimonials.
@@ -187,8 +187,8 @@ export default function InstallationPipeline() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
           <Plus className="w-6 h-6 text-green-600" />
           New Installation Entry
         </h3>
@@ -368,9 +368,9 @@ export default function InstallationPipeline() {
         </form>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold text-gray-800">Installation Pipeline Entries</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Installation Pipeline Entries</h3>
           <span className="text-sm text-gray-600">{filteredEntries.length} entries</span>
         </div>
 
@@ -391,13 +391,13 @@ export default function InstallationPipeline() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Customer</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Phone</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Site Survey</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Installation</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Handed Over</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Date</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Customer</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Phone</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Site Survey</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Installation</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Handed Over</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">

@@ -2,6 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-gray-100 text-gray-800 antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  ::selection {
+    @apply bg-brand-200 text-brand-950;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-1;
+  }
+
+  input,
+  select,
+  textarea {
+    @apply text-gray-900 caret-brand-600;
+  }
+
+  select {
+    @apply bg-white;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-gray-400;
+  }
+
+  input[type='radio'],
+  input[type='checkbox'] {
+    @apply accent-brand-600;
+  }
+
+  /* Money and quantities line up in columns. */
+  table,
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  th {
+    @apply font-semibold tracking-normal;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.gray.300') transparent;
+  }
+}
+
 @media print {
   @page {
     size: A4;

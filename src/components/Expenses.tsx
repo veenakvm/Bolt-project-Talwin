@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Search, Plus, CreditCard as Edit2, X, Save, Trash2, TrendingUp, FileDown, FileText } from 'lucide-react';
+import { Search, Plus, Pencil as Edit2, X, Save, Trash2, TrendingUp, FileDown, FileText } from 'lucide-react';
 import jsPDF from 'jspdf';
 
 const PRESET_CATEGORIES = [
@@ -283,41 +283,41 @@ export default function Expenses() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Expenses</h1>
+        <h1 className="text-2xl font-semibold text-gray-900 mb-1">Expenses</h1>
         <p className="text-gray-600">Track and manage your business expenses</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg shadow-md p-6 text-white">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6 text-gray-900">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-amber-100 text-sm mb-1">Total Expenses (Filtered)</p>
-              <p className="text-3xl font-bold">₹{totalExpenses.toLocaleString()}</p>
+              <p className="text-gray-500 text-sm mb-1">Total Expenses (Filtered)</p>
+              <p className="text-2xl font-semibold text-gray-900">₹{totalExpenses.toLocaleString()}</p>
             </div>
-            <TrendingUp className="w-10 h-10 text-amber-200" />
+            <TrendingUp className="w-10 h-10 text-brand-500" />
           </div>
         </div>
-        <div className="bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg shadow-md p-6 text-white">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6 text-gray-900">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-teal-100 text-sm mb-1">This Month</p>
-              <p className="text-3xl font-bold">₹{monthlyTotal.toLocaleString()}</p>
+              <p className="text-gray-500 text-sm mb-1">This Month</p>
+              <p className="text-2xl font-semibold text-gray-900">₹{monthlyTotal.toLocaleString()}</p>
             </div>
-            <TrendingUp className="w-10 h-10 text-teal-200" />
+            <TrendingUp className="w-10 h-10 text-brand-500" />
           </div>
         </div>
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md p-6 text-white">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6 text-gray-900">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-100 text-sm mb-1">Total Entries</p>
-              <p className="text-3xl font-bold">{filteredExpenses.length}</p>
+              <p className="text-gray-500 text-sm mb-1">Total Entries</p>
+              <p className="text-2xl font-semibold text-gray-900">{filteredExpenses.length}</p>
             </div>
-            <TrendingUp className="w-10 h-10 text-blue-200" />
+            <TrendingUp className="w-10 h-10 text-brand-500" />
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6 mb-6">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Expense</h2>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
@@ -327,7 +327,7 @@ export default function Expenses() {
               required
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             />
           </div>
 
@@ -336,7 +336,7 @@ export default function Expenses() {
             <select
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             >
               {PRESET_CATEGORIES.map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
@@ -349,7 +349,7 @@ export default function Expenses() {
                 placeholder="Enter category name"
                 value={customCategory}
                 onChange={(e) => setCustomCategory(e.target.value)}
-                className="mt-2 w-full px-3 py-2 border border-amber-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="mt-2 w-full px-3 py-2 border border-amber-300 rounded-md focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 required
               />
             )}
@@ -364,7 +364,7 @@ export default function Expenses() {
               required
               value={formData.amount}
               onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             />
           </div>
 
@@ -373,7 +373,7 @@ export default function Expenses() {
             <select
               value={formData.payment_mode}
               onChange={(e) => setFormData({ ...formData, payment_mode: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             >
               <option value="Cash">Cash</option>
               <option value="UPI">UPI</option>
@@ -387,7 +387,7 @@ export default function Expenses() {
               required
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-y min-h-[60px]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-y min-h-[60px]"
               rows={2}
             />
           </div>
@@ -398,14 +398,14 @@ export default function Expenses() {
               type="text"
               value={formData.remarks}
               onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             />
           </div>
 
           <div className="flex items-end">
             <button
               type="submit"
-              className="w-full bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700 transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-brand-600 text-white px-4 py-2 rounded-md hover:bg-brand-700 transition-colors flex items-center justify-center gap-2"
             >
               <Plus className="w-4 h-4" />
               Add Expense
@@ -414,7 +414,7 @@ export default function Expenses() {
         </form>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
           <h2 className="text-xl font-semibold text-gray-800">
             Expense List ({filteredExpenses.length})
@@ -428,14 +428,14 @@ export default function Expenses() {
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               />
             </div>
 
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             >
               <option value="All">All Categories</option>
               {allCategories.map(cat => (
@@ -447,13 +447,13 @@ export default function Expenses() {
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             />
             <input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             />
 
             {(dateFrom || dateTo || filterCategory !== 'All' || searchQuery) && (
@@ -486,13 +486,13 @@ export default function Expenses() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Mode</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Remarks</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Category</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Description</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Amount</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Payment Mode</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Remarks</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -616,7 +616,7 @@ export default function Expenses() {
                           <div className="flex items-end gap-2">
                             <button
                               onClick={() => handleUpdate(expense.id)}
-                              className="flex-1 bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700 transition-colors flex items-center justify-center gap-2"
+                              className="flex-1 bg-brand-600 text-white px-4 py-2 rounded-md hover:bg-brand-700 transition-colors flex items-center justify-center gap-2"
                             >
                               <Save className="w-4 h-4" />
                               Save

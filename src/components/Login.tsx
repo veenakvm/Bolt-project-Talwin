@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { LogIn, KeyRound, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { KeyRound, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import VendorSignup from './VendorSignup';
+
+const logoSrc = `${import.meta.env.BASE_URL}talwin-logo.jpeg`;
 
 type Mode = 'login' | 'change-password' | 'vendor-signup';
 
@@ -85,8 +87,42 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
+    <div className="min-h-screen lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] bg-white">
+      <aside className="hidden lg:flex flex-col justify-between bg-brand-950 text-brand-100 p-12 xl:p-16">
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-12 rounded-lg bg-white p-1.5">
+            <img src={logoSrc} alt="Talwin AquaRay logo" className="h-full w-full object-contain" />
+          </div>
+          <div>
+            <div className="text-base font-semibold text-white leading-tight">TALWIN AquaRay</div>
+            <div className="text-sm text-brand-300 leading-tight">Solutions</div>
+          </div>
+        </div>
+        <div className="max-w-md">
+          <h2 className="text-3xl xl:text-4xl font-semibold text-white leading-tight tracking-tight">
+            Water treatment and solar, from site survey to invoice.
+          </h2>
+          <ul className="mt-8 space-y-3 text-sm text-brand-200">
+            <li className="flex gap-3"><span className="mt-2 h-1.5 w-1.5 rounded-full bg-brand-400 shrink-0" />Sales, installation and complaint pipelines</li>
+            <li className="flex gap-3"><span className="mt-2 h-1.5 w-1.5 rounded-full bg-brand-400 shrink-0" />Site surveys with product specifications</li>
+            <li className="flex gap-3"><span className="mt-2 h-1.5 w-1.5 rounded-full bg-brand-400 shrink-0" />GST quotations and invoices</li>
+          </ul>
+        </div>
+        <div className="text-xs text-brand-400 leading-relaxed">
+          No 34, Nyanappanhalli, 80 Feet Road, BTM 4th Stage, Bengaluru 560076<br />
+          89040 69224 · www.talwin.in · info@talwin.in
+        </div>
+      </aside>
+
+      <div className="min-h-screen flex items-center justify-center px-5 py-10 sm:px-8">
+      <div className="w-full max-w-sm">
+        <div className="lg:hidden flex items-center gap-3 mb-10">
+          <img src={logoSrc} alt="Talwin AquaRay logo" className="h-11 w-11 object-contain" />
+          <div>
+            <div className="text-base font-semibold text-gray-900 leading-tight">TALWIN AquaRay</div>
+            <div className="text-sm text-gray-500 leading-tight">Solutions</div>
+          </div>
+        </div>
 
         {mode === 'vendor-signup' && (
           <VendorSignup onBack={() => { setMode('login'); setError(''); }} />
@@ -94,14 +130,9 @@ export default function Login() {
 
         {mode === 'login' && (
           <>
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-                <LogIn className="w-8 h-8 text-blue-600" />
-              </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Welcome to Talwin Aquaray Solutions
-              </h1>
-              <p className="text-gray-600">Staff and vendors: sign in to access the dashboard</p>
+            <div className="mb-8">
+              <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Sign in</h1>
+              <p className="mt-1 text-sm text-gray-600">Staff and vendors: sign in to access the dashboard.</p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-6">
@@ -115,7 +146,7 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter your email"
                 />
               </div>
@@ -131,7 +162,7 @@ export default function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
+                    className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
                     placeholder="Enter your password"
                   />
                   <button
@@ -153,7 +184,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-brand-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
@@ -185,11 +216,8 @@ export default function Login() {
 
         {mode === 'change-password' && (
           <>
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-100 rounded-full mb-4">
-                <KeyRound className="w-8 h-8 text-amber-600" />
-              </div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Change Password</h1>
+            <div className="mb-8">
+              <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Change password</h1>
               <p className="text-gray-600">Enter your current credentials and a new password</p>
             </div>
 
@@ -201,7 +229,7 @@ export default function Login() {
                   value={cpEmail}
                   onChange={(e) => setCpEmail(e.target.value)}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   placeholder="Your email"
                 />
               </div>
@@ -214,7 +242,7 @@ export default function Login() {
                     value={cpCurrentPassword}
                     onChange={(e) => setCpCurrentPassword(e.target.value)}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent pr-12"
+                    className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent pr-12"
                     placeholder="Current password"
                   />
                   <button
@@ -236,7 +264,7 @@ export default function Login() {
                     onChange={(e) => setCpNewPassword(e.target.value)}
                     required
                     minLength={6}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent pr-12"
+                    className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent pr-12"
                     placeholder="New password (min 6 chars)"
                   />
                   <button
@@ -256,7 +284,7 @@ export default function Login() {
                   value={cpConfirmPassword}
                   onChange={(e) => setCpConfirmPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   placeholder="Confirm new password"
                 />
               </div>
@@ -276,7 +304,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-amber-600 text-white py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-brand-600 text-white py-3 rounded-lg font-semibold hover:bg-brand-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Updating...' : 'Update Password'}
               </button>
@@ -292,6 +320,7 @@ export default function Login() {
             </form>
           </>
         )}
+      </div>
       </div>
     </div>
   );

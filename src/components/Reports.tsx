@@ -244,7 +244,8 @@ export default function Reports() {
 
   const totalExpenses = useMemo(() => filtExpenses.reduce((s, e) => s + e.amount, 0), [filtExpenses]);
 
-  const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#06B6D4', '#EC4899', '#84CC16', '#8B5CF6'];
+  // Brand teal first, then the logo's leaf green and sun yellow, then supporting hues.
+  const COLORS = ['#1f8fc8', '#5a9a30', '#e0b000', '#12618d', '#79c3e5', '#8a6fb8', '#d9734a', '#64748b'];
 
   if (loading) {
     return (
@@ -262,7 +263,7 @@ export default function Reports() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold text-gray-800 mb-1">Reports</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-1">Reports</h2>
         <p className="text-gray-500 text-sm">Analytics and financial summaries across all modules</p>
       </div>
 
@@ -294,38 +295,38 @@ export default function Reports() {
       {activeTab === 'dashboard' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6 text-gray-900">
               <div className="flex items-center justify-between mb-2">
-                <TrendingUp className="w-8 h-8" />
-                <span className="text-3xl font-bold">{kpis.totalSalesLeads}</span>
+                <TrendingUp className="w-8 h-8 text-brand-600" />
+                <span className="text-2xl font-semibold text-gray-900">{kpis.totalSalesLeads}</span>
               </div>
-              <p className="text-blue-100 text-sm">Total Sales Leads</p>
+              <p className="text-gray-500 text-sm">Total Sales Leads</p>
             </div>
-            <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6 text-gray-900">
               <div className="flex items-center justify-between mb-2">
-                <Wrench className="w-8 h-8" />
-                <span className="text-3xl font-bold">{kpis.totalInstallations}</span>
+                <Wrench className="w-8 h-8 text-brand-600" />
+                <span className="text-2xl font-semibold text-gray-900">{kpis.totalInstallations}</span>
               </div>
-              <p className="text-green-100 text-sm">Total Installations</p>
+              <p className="text-gray-500 text-sm">Total Installations</p>
             </div>
-            <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-lg p-6 text-white">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6 text-gray-900">
               <div className="flex items-center justify-between mb-2">
-                <AlertCircle className="w-8 h-8" />
-                <span className="text-3xl font-bold">{kpis.totalComplaints}</span>
+                <AlertCircle className="w-8 h-8 text-brand-600" />
+                <span className="text-2xl font-semibold text-gray-900">{kpis.totalComplaints}</span>
               </div>
-              <p className="text-orange-100 text-sm">Total Complaints</p>
+              <p className="text-gray-500 text-sm">Total Complaints</p>
             </div>
-            <div className="bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg shadow-lg p-6 text-white">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6 text-gray-900">
               <div className="flex items-center justify-between mb-2">
-                <Users className="w-8 h-8" />
-                <span className="text-3xl font-bold">{todayCustomers}</span>
+                <Users className="w-8 h-8 text-brand-600" />
+                <span className="text-2xl font-semibold text-gray-900">{todayCustomers}</span>
               </div>
-              <p className="text-gray-300 text-sm">Customers Visited Today</p>
+              <p className="text-gray-500 text-sm">Customers Visited Today</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6">
               <h3 className="text-lg font-bold text-gray-800 mb-1">Quotation Status</h3>
               <p className="text-sm text-gray-500 mb-4">Sent vs Pending</p>
               <div className="flex items-center gap-8 mb-3">
@@ -347,7 +348,7 @@ export default function Reports() {
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6">
               <h3 className="text-lg font-bold text-gray-800 mb-4">City-wise Breakdown</h3>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart key={`city-${dateFilter}-${customStartDate}-${customEndDate}`} data={cityBreakdown}>
@@ -355,14 +356,14 @@ export default function Reports() {
                   <XAxis dataKey="city" angle={-45} textAnchor="end" height={80} />
                   <YAxis allowDecimals={false} />
                   <Tooltip />
-                  <Bar dataKey="count" fill="#3B82F6" />
+                  <Bar dataKey="count" fill="#1f8fc8" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6">
               <h3 className="text-lg font-bold text-gray-800 mb-4">Lead Sources</h3>
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart key={`src-${dateFilter}-${customStartDate}-${customEndDate}`}>
@@ -375,7 +376,7 @@ export default function Reports() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6">
               <h3 className="text-lg font-bold text-gray-800 mb-1">Installation Status</h3>
               <p className="text-xs text-gray-400 mb-4">{getPeriodLabel(dateFilter, customStartDate, customEndDate)}</p>
               <ResponsiveContainer width="100%" height={220}>
@@ -391,7 +392,7 @@ export default function Reports() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6">
               <h3 className="text-lg font-bold text-gray-800 mb-1">Complaint Status</h3>
               <p className="text-xs text-gray-400 mb-4">{getPeriodLabel(dateFilter, customStartDate, customEndDate)}</p>
               <ResponsiveContainer width="100%" height={220}>
@@ -416,25 +417,25 @@ export default function Reports() {
         <div className="space-y-6">
           {/* KPI Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg p-6 text-white shadow">
-              <p className="text-amber-100 text-sm mb-1">Total Expenses</p>
-              <p className="text-2xl font-bold">{fmt(totalExpenses)}</p>
-              <p className="text-amber-200 text-xs mt-1">{filtExpenses.length} entries</p>
+            <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6 text-gray-900">
+              <p className="text-gray-500 text-sm mb-1">Total Expenses</p>
+              <p className="text-xl font-semibold text-gray-900">{fmt(totalExpenses)}</p>
+              <p className="text-gray-500 text-xs mt-1">{filtExpenses.length} entries</p>
             </div>
-            <div className="bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg p-6 text-white shadow">
-              <p className="text-teal-100 text-sm mb-1">Highest Category</p>
-              <p className="text-2xl font-bold">{expenseCategoryTotals[0]?.name || '—'}</p>
-              <p className="text-teal-200 text-xs mt-1">{expenseCategoryTotals[0] ? fmt(expenseCategoryTotals[0].value) : ''}</p>
+            <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6 text-gray-900">
+              <p className="text-gray-500 text-sm mb-1">Highest Category</p>
+              <p className="text-xl font-semibold text-gray-900">{expenseCategoryTotals[0]?.name || '—'}</p>
+              <p className="text-gray-500 text-xs mt-1">{expenseCategoryTotals[0] ? fmt(expenseCategoryTotals[0].value) : ''}</p>
             </div>
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white shadow">
-              <p className="text-blue-100 text-sm mb-1">Avg per Entry</p>
-              <p className="text-2xl font-bold">{filtExpenses.length ? fmt(totalExpenses / filtExpenses.length) : '₹0.00'}</p>
+            <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6 text-gray-900">
+              <p className="text-gray-500 text-sm mb-1">Avg per Entry</p>
+              <p className="text-xl font-semibold text-gray-900">{filtExpenses.length ? fmt(totalExpenses / filtExpenses.length) : '₹0.00'}</p>
             </div>
           </div>
 
           {/* Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6">
               <h3 className="text-lg font-bold text-gray-800 mb-4">Expenses by Category</h3>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={expenseCategoryTotals} layout="vertical">
@@ -446,7 +447,7 @@ export default function Reports() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6">
               <h3 className="text-lg font-bold text-gray-800 mb-4">Payment Mode Breakdown</h3>
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
@@ -462,7 +463,7 @@ export default function Reports() {
           </div>
 
           {/* Table */}
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-card p-6">
             <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
               <h3 className="text-lg font-bold text-gray-800">Expense Details ({filtExpenses.length})</h3>
               <div className="flex items-center gap-3">
@@ -473,12 +474,12 @@ export default function Reports() {
                     placeholder="Search expenses..."
                     value={expenseSearch}
                     onChange={e => setExpenseSearch(e.target.value)}
-                    className="pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    className="pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   />
                 </div>
                 <button
                   onClick={() => generateExpenseReportPDF(filtExpenses, totalExpenses, getPeriodLabel(dateFilter, customStartDate, customEndDate))}
-                  className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 transition-colors"
                 >
                   <Download className="w-4 h-4" />Export PDF
                 </button>
@@ -488,12 +489,12 @@ export default function Reports() {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Amount</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mode</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Remarks</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Category</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Description</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Amount</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Mode</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Remarks</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
