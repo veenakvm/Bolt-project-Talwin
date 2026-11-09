@@ -2,11 +2,16 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 
-export type UserRole = 'staff' | 'dealer';
+/**
+ * staff: full access. dealer: vendor/dealer, own quotations and invoices only.
+ * pending: signed up, waiting for staff approval. disabled: access removed.
+ */
+export type UserRole = 'staff' | 'dealer' | 'pending' | 'disabled';
+
+const ROLES: UserRole[] = ['staff', 'dealer', 'pending', 'disabled'];
 
 interface AuthContextType {
   user: User | null;
-  /** 'dealer' for dealer logins; everyone else (including users with no profile row) is 'staff'. */
   role: UserRole;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -53,7 +58,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .then(({ data, error }) => {
         if (!active) return;
         if (error) console.error('Could not load user role:', error.message);
-        setRole(data?.role === 'dealer' ? 'dealer' : 'staff');
+        // A user with no profile row predates roles and is treated as staff.
+        // Every new sign-up gets a 'pending' row from a database trigger.
+        setRole(ROLES.includes(data?.role) ? data!.role as UserRole : 'staff');
         setRoleLoading(false);
       });
     return () => { active = false; };

@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { LogIn, KeyRound, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import VendorSignup from './VendorSignup';
 
-type Mode = 'login' | 'change-password';
+type Mode = 'login' | 'change-password' | 'vendor-signup';
 
 export default function Login() {
   const [mode, setMode] = useState<Mode>('login');
@@ -87,6 +88,10 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
 
+        {mode === 'vendor-signup' && (
+          <VendorSignup onBack={() => { setMode('login'); setError(''); }} />
+        )}
+
         {mode === 'login' && (
           <>
             <div className="text-center mb-8">
@@ -96,7 +101,7 @@ export default function Login() {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 Welcome to Talwin Aquaray Solutions
               </h1>
-              <p className="text-gray-600">Staff and dealers: sign in to access the dashboard</p>
+              <p className="text-gray-600">Staff and vendors: sign in to access the dashboard</p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-6">
@@ -164,6 +169,17 @@ export default function Login() {
                 </button>
               </div>
             </form>
+
+            <div className="mt-6 pt-6 border-t border-gray-200 text-center text-sm text-gray-600">
+              New vendor?{' '}
+              <button
+                type="button"
+                onClick={() => { setMode('vendor-signup'); setError(''); }}
+                className="text-blue-600 hover:text-blue-800 font-semibold"
+              >
+                Register here
+              </button>
+            </div>
           </>
         )}
 

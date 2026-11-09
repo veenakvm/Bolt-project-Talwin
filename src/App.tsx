@@ -7,6 +7,7 @@ import SalesPipeline from './components/SalesPipeline';
 import InstallationPipeline from './components/InstallationPipeline';
 import ComplaintPipeline from './components/ComplaintPipeline';
 import Reports from './components/Reports';
+import UserAccess from './components/UserAccess';
 import Products from './components/Products';
 import Architects from './components/Architects';
 import Vendors from './components/Vendors';
@@ -14,9 +15,9 @@ import Expenses from './components/Expenses';
 import Invoices from './components/Invoices';
 import Quotations from './components/Quotations';
 import type { QuotationForInvoice } from './components/Invoices';
-import { ClipboardList, List, LogOut, TrendingUp, Wrench, AlertCircle, BarChart3, DollarSign, Package, Users, Building2, FileText, Receipt } from 'lucide-react';
+import { ClipboardList, List, LogOut, TrendingUp, Wrench, AlertCircle, BarChart3, DollarSign, ShieldCheck, Clock, Package, Users, Building2, FileText, Receipt } from 'lucide-react';
 
-type MainTab = 'surveys' | 'pipelines' | 'finance' | 'reports';
+type MainTab = 'surveys' | 'pipelines' | 'finance' | 'reports' | 'access';
 type SurveyView = 'form' | 'list';
 type PipelineView = 'sales' | 'installation' | 'complaint' | 'architects' | 'vendors';
 type FinanceView = 'products' | 'expenses' | 'quotations' | 'invoices';
@@ -51,6 +52,31 @@ function App() {
     return <Login />;
   }
 
+  if (role === 'pending' || role === 'disabled') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 text-center space-y-4">
+          <Clock className="w-14 h-14 text-amber-500 mx-auto" />
+          <h1 className="text-2xl font-bold text-gray-900">
+            {role === 'pending' ? 'Waiting for approval' : 'Access disabled'}
+          </h1>
+          <p className="text-gray-600">
+            {role === 'pending'
+              ? 'Thanks for registering. Talwin staff will review your account. Please sign in again once you have been approved.'
+              : 'Your access to the Talwin portal has been turned off. Please contact Talwin AquaRay if you think this is a mistake.'}
+          </p>
+          <p className="text-sm text-gray-500">Signed in as {user.email}</p>
+          <button
+            onClick={signOut}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold bg-red-100 text-red-700 hover:bg-red-200"
+          >
+            <LogOut className="w-5 h-5" /> Sign Out
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <nav className="bg-white shadow-md">
@@ -65,7 +91,7 @@ function App() {
               <div>
                 <h1 className="text-2xl font-bold text-gray-800">TALWIN AquaRay Solutions</h1>
                 <p className="text-sm text-gray-600">
-                  {isDealer ? 'Dealer Portal' : 'Field Technician Management System'}
+                  {isDealer ? 'Vendor Portal' : 'Field Technician Management System'}
                 </p>
               </div>
             </div>
@@ -122,6 +148,17 @@ function App() {
             >
               <BarChart3 className="w-5 h-5 inline mr-2" />
               Reports
+            </button>}
+            {!isDealer && <button
+              onClick={() => setMainTab('access')}
+              className={`px-6 py-3 font-semibold transition-all border-b-2 ${
+                activeTab === 'access'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              <ShieldCheck className="w-5 h-5 inline mr-2" />
+              User Access
             </button>}
           </div>
         </div>
@@ -306,6 +343,7 @@ function App() {
         )}
 
         {activeTab === 'reports' && <Reports />}
+        {activeTab === 'access' && <UserAccess />}
       </main>
 
       <footer className="bg-white border-t border-gray-200 mt-12">
